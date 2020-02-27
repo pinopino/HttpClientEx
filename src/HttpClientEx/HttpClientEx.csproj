@@ -8,4 +8,10 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="FastMember">
+      <HintPath>..\..\lib\FastMember.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
