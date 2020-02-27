@@ -9,6 +9,9 @@ namespace HttpClientEx
 {
     public class QueryString : Collection<KeyValuePair<string, string>>
     {
+        public QueryString()
+        { }
+
         public QueryString(Dictionary<string, object> dict)
         {
             if (dict == null)
