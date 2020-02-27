@@ -1,0 +1,2 @@
+# HttpClientEx
+解决一些httpclient固有的问题，顺带提供一组扩展方法方便使用
