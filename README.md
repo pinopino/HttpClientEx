@@ -12,8 +12,8 @@
 
 重点参考的是第三个项目，在其基础之上提供了更多的扩展方法；
 
-#### 使用
+### 使用
 通过`HttpClientManager`正确的拿到`HttpClient`对象之后借助扩展方法愉快的编码即可。
 
-#### 参考链接
+### 参考链接
 https://docs.microsoft.com/en-us/dotnet/api/system.net.http.httpclient
