@@ -7,28 +7,28 @@ using System.Net;
 
 namespace HttpClientEx
 {
-    public class QueryString : Collection<KeyValuePair<string, string>>
+    public class FormString : Collection<KeyValuePair<string, string>>
     {
-        public QueryString()
+        public FormString()
         { }
 
-        public QueryString(Dictionary<string, object> dict)
+        public FormString(Dictionary<string, object> dict)
         {
             if (dict == null)
                 throw new ArgumentNullException(nameof(dict));
 
             foreach (var key in dict.Keys)
-                Add(new KeyValuePair<string, string>(key, dict[key].ToString())); // 所以最好这个object是实现了ToString()的
+                Add(new KeyValuePair<string, string>(key, dict[key].ToString()));
         }
 
-        public QueryString(object obj)
+        public FormString(object obj)
         {
             var acc = ObjectAccessor.Create(obj);
             foreach (var member in acc.TypeAccessor.GetMembers())
                 Add(new KeyValuePair<string, string>(member.Name, acc[member.Name].ToString()));
         }
 
-        public QueryString Append(string key, string value)
+        public FormString Append(string key, string value)
         {
             Add(new KeyValuePair<string, string>(key, value));
             return this;

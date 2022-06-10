@@ -1,6 +1,7 @@
 ﻿using HttpClientEx.Common;
 using HttpClientEx.Constants;
 using HttpClientEx.Serialization;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -58,14 +59,17 @@ namespace HttpClientEx
         /// <param name="headers">自定义请求头</param>
         /// <returns>请求的字符串</returns>
         public static string GetString(this HttpClient httpClient, string url,
-            QueryString queryString = null, object body = null, IDictionary<string, string> headers = null)
+            QueryString queryString = null, object body = null, IDictionary<string, string> headers = null, TimeSpan timeout = default, string contentType = ContentTypes.Json)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
 
             var request = httpClient.CreateRequest(HttpMethod.Get, url, queryString, headers);
+            if (timeout != TimeSpan.Zero)
+                request.SetTimeout(timeout);
+            
             if (body != null)
-                request.Content = CreateContent(body);
+                request.Content = CreateContent(body, contentType);
 
             using (var response = httpClient.SendAsync(request).Result)
             {
@@ -84,14 +88,17 @@ namespace HttpClientEx
         /// <param name="headers">自定义请求头</param>
         /// <returns>请求的字符串</returns>
         public static async Task<string> GetStringAsync(this HttpClient httpClient, string url,
-            QueryString queryString = null, object body = null, IDictionary<string, string> headers = null)
+            QueryString queryString = null, object body = null, IDictionary<string, string> headers = null, TimeSpan timeout = default, string contentType = ContentTypes.Json)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
 
             var request = httpClient.CreateRequest(HttpMethod.Get, url, queryString, headers);
+            if (timeout != TimeSpan.Zero)
+                request.SetTimeout(timeout);
+
             if (body != null)
-                request.Content = CreateContent(body);
+                request.Content = CreateContent(body, contentType);
 
             using (var response = await httpClient.SendAsync(request))
             {
@@ -110,14 +117,17 @@ namespace HttpClientEx
         /// <param name="headers">自定义请求头</param>
         /// <returns>请求的byte数组</returns>
         public static byte[] GetBytes(this HttpClient httpClient, string url,
-            QueryString queryString = null, object body = null, IDictionary<string, string> headers = null)
+            QueryString queryString = null, object body = null, IDictionary<string, string> headers = null, TimeSpan timeout = default, string contentType = ContentTypes.Json)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
 
             var request = httpClient.CreateRequest(HttpMethod.Get, url, queryString, headers);
+            if (timeout != TimeSpan.Zero)
+                request.SetTimeout(timeout);
+
             if (body != null)
-                request.Content = CreateContent(body);
+                request.Content = CreateContent(body, contentType);
 
             using (var response = httpClient.SendAsync(request).Result)
             {
@@ -136,14 +146,17 @@ namespace HttpClientEx
         /// <param name="headers">自定义请求头</param>
         /// <returns>请求的byte数组</returns>
         public static async Task<byte[]> GetBytesAsync(this HttpClient httpClient, string url,
-            QueryString queryString = null, object body = null, IDictionary<string, string> headers = null)
+            QueryString queryString = null, object body = null, IDictionary<string, string> headers = null, TimeSpan timeout = default, string contentType = ContentTypes.Json)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
 
             var request = httpClient.CreateRequest(HttpMethod.Get, url, queryString, headers);
+            if (timeout != TimeSpan.Zero)
+                request.SetTimeout(timeout);
+
             if (body != null)
-                request.Content = CreateContent(body);
+                request.Content = CreateContent(body, contentType);
 
             using (var response = await httpClient.SendAsync(request))
             {
@@ -162,14 +175,17 @@ namespace HttpClientEx
         /// <param name="headers">自定义请求头</param>
         /// <returns>返回的HttpResponseMessage</returns>
         public static Task<HttpResponseMessage> GetAsync(this HttpClient httpClient, string url,
-            QueryString queryString = null, object body = null, IDictionary<string, string> headers = null)
+            QueryString queryString = null, object body = null, IDictionary<string, string> headers = null, TimeSpan timeout = default, string contentType = ContentTypes.Json)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
 
             var request = httpClient.CreateRequest(HttpMethod.Get, url, queryString, headers);
+            if (timeout != TimeSpan.Zero)
+                request.SetTimeout(timeout);
+
             if (body != null)
-                request.Content = CreateContent(body);
+                request.Content = CreateContent(body, contentType);
 
             return httpClient.SendAsync(request);
         }
@@ -186,7 +202,7 @@ namespace HttpClientEx
         /// <param name="headers">自定义请求头</param>
         /// <returns>请求的字符串</returns>
         public static string PostForString(this HttpClient httpClient, string url,
-            object body, QueryString queryString = null, IDictionary<string, string> headers = null)
+            object body, QueryString queryString = null, IDictionary<string, string> headers = null, TimeSpan timeout = default, string contentType = ContentTypes.Json)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
@@ -194,7 +210,9 @@ namespace HttpClientEx
                 throw new ArgumentNullException(nameof(body));
 
             var request = httpClient.CreateRequest(HttpMethod.Post, url, queryString, headers);
-            request.Content = CreateContent(body);
+            if (timeout != TimeSpan.Zero)
+                request.SetTimeout(timeout);
+            request.Content = CreateContent(body, contentType);
 
             using (var response = httpClient.SendAsync(request).Result)
             {
@@ -213,7 +231,7 @@ namespace HttpClientEx
         /// <param name="headers">自定义请求头</param>
         /// <returns>请求的字符串</returns>
         public static async Task<string> PostForStringAsync(this HttpClient httpClient, string url,
-            object body, QueryString queryString = null, IDictionary<string, string> headers = null)
+            object body, QueryString queryString = null, IDictionary<string, string> headers = null, TimeSpan timeout = default, string contentType = ContentTypes.Json)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
@@ -221,7 +239,9 @@ namespace HttpClientEx
                 throw new ArgumentNullException(nameof(body));
 
             var request = httpClient.CreateRequest(HttpMethod.Post, url, queryString, headers);
-            request.Content = CreateContent(body);
+            if (timeout != TimeSpan.Zero)
+                request.SetTimeout(timeout);
+            request.Content = CreateContent(body, contentType);
 
             using (var response = await httpClient.SendAsync(request))
             {
@@ -240,7 +260,7 @@ namespace HttpClientEx
         /// <param name="headers">自定义请求头</param>
         /// <returns>请求的byte数组</returns>
         public static byte[] PostForBytes(this HttpClient httpClient, string url,
-            object body, QueryString queryString = null, IDictionary<string, string> headers = null)
+            object body, QueryString queryString = null, IDictionary<string, string> headers = null, TimeSpan timeout = default, string contentType = ContentTypes.Json)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
@@ -248,7 +268,9 @@ namespace HttpClientEx
                 throw new ArgumentNullException(nameof(body));
 
             var request = httpClient.CreateRequest(HttpMethod.Post, url, queryString, headers);
-            request.Content = CreateContent(body);
+            if (timeout != TimeSpan.Zero)
+                request.SetTimeout(timeout);
+            request.Content = CreateContent(body, contentType);
 
             using (var response = httpClient.SendAsync(request).Result)
             {
@@ -267,7 +289,7 @@ namespace HttpClientEx
         /// <param name="headers">自定义请求头</param>
         /// <returns>请求的byte数组</returns>
         public static async Task<byte[]> PostForBytesAsync(this HttpClient httpClient, string url,
-            object body, QueryString queryString = null, IDictionary<string, string> headers = null)
+            object body, QueryString queryString = null, IDictionary<string, string> headers = null, TimeSpan timeout = default, string contentType = ContentTypes.Json)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
@@ -275,7 +297,9 @@ namespace HttpClientEx
                 throw new ArgumentNullException(nameof(body));
 
             var request = httpClient.CreateRequest(HttpMethod.Post, url, queryString, headers);
-            request.Content = CreateContent(body);
+            if (timeout != TimeSpan.Zero)
+                request.SetTimeout(timeout);
+            request.Content = CreateContent(body, contentType);
 
             using (var response = await httpClient.SendAsync(request))
             {
@@ -294,7 +318,7 @@ namespace HttpClientEx
         /// <param name="headers">自定义请求头</param>
         /// <returns>返回的HttpResponseMessage</returns>
         public static Task<HttpResponseMessage> PostAsync(this HttpClient httpClient, string url,
-            object body, QueryString queryString = null, IDictionary<string, string> headers = null)
+            object body, QueryString queryString = null, IDictionary<string, string> headers = null, TimeSpan timeout = default, string contentType = ContentTypes.Json)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
@@ -302,7 +326,9 @@ namespace HttpClientEx
                 throw new ArgumentNullException(nameof(body));
 
             var request = httpClient.CreateRequest(HttpMethod.Post, url, queryString, headers);
-            request.Content = CreateContent(body);
+            if (timeout != TimeSpan.Zero)
+                request.SetTimeout(timeout);
+            request.Content = CreateContent(body, contentType);
 
             return httpClient.SendAsync(request);
         }
@@ -319,7 +345,7 @@ namespace HttpClientEx
         /// <param name="headers">自定义请求头</param>
         /// <returns>返回的HttpResponseMessage</returns>
         public static Task<HttpResponseMessage> PatchAsync(this HttpClient httpClient, string url,
-            object body, QueryString queryString = null, IDictionary<string, string> headers = null)
+            object body, QueryString queryString = null, IDictionary<string, string> headers = null, TimeSpan timeout = default, string contentType = ContentTypes.Json)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
@@ -327,7 +353,9 @@ namespace HttpClientEx
                 throw new ArgumentNullException(nameof(body));
 
             var request = httpClient.CreateRequest(new HttpMethod("PATCH"), url, queryString, headers);
-            request.Content = CreateContent(body);
+            if (timeout != TimeSpan.Zero)
+                request.SetTimeout(timeout);
+            request.Content = CreateContent(body, contentType);
 
             return httpClient.SendAsync(request);
         }
@@ -344,7 +372,7 @@ namespace HttpClientEx
         /// <param name="headers">自定义请求头</param>
         /// <returns>返回的HttpResponseMessage</returns>
         public static Task<HttpResponseMessage> PutAsync(this HttpClient httpClient, string url,
-            object body, QueryString queryString = null, IDictionary<string, string> headers = null)
+            object body, QueryString queryString = null, IDictionary<string, string> headers = null, TimeSpan timeout = default, string contentType = ContentTypes.Json)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
@@ -352,7 +380,9 @@ namespace HttpClientEx
                 throw new ArgumentNullException(nameof(body));
 
             var request = httpClient.CreateRequest(HttpMethod.Put, url, queryString, headers);
-            request.Content = CreateContent(body);
+            if (timeout != TimeSpan.Zero)
+                request.SetTimeout(timeout);
+            request.Content = CreateContent(body, contentType);
 
             return httpClient.SendAsync(request);
         }
@@ -369,14 +399,17 @@ namespace HttpClientEx
         /// <param name="headers">自定义请求头</param>
         /// <returns>返回的HttpResponseMessage</returns>
         public static Task<HttpResponseMessage> DeleteAsync(this HttpClient httpClient, string url,
-            QueryString queryString = null, object body = null, IDictionary<string, string> headers = null)
+            QueryString queryString = null, object body = null, IDictionary<string, string> headers = null, TimeSpan timeout = default, string contentType = ContentTypes.Json)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
 
             var request = httpClient.CreateRequest(HttpMethod.Delete, url, queryString, headers);
+            if (timeout != TimeSpan.Zero)
+                request.SetTimeout(timeout);
+
             if (body != null)
-                request.Content = CreateContent(body);
+                request.Content = CreateContent(body, contentType);
 
             return httpClient.SendAsync(request);
         }
@@ -387,12 +420,12 @@ namespace HttpClientEx
         {
             var finalUrl = url;
             if (httpClient.BaseAddress != null)
-                finalUrl = UrlUtility.Combine(httpClient.BaseAddress.OriginalString, url);
+                finalUrl = URLUtility.Combine(httpClient.BaseAddress.OriginalString, url);
 
             if (queryString == null)
                 return finalUrl;
 
-            finalUrl = UrlUtility.AppendQueryString(finalUrl, queryString.ToString());
+            finalUrl = URLUtility.AppendQueryString(finalUrl, queryString.ToString());
 
             return finalUrl;
         }
@@ -411,12 +444,44 @@ namespace HttpClientEx
             return request;
         }
 
-        private static HttpContent CreateContent(object body)
+        private static HttpContent CreateContent(object body, string contentType)
         {
-            var jsonSerializer = new NewtonsoftSerializer();
-            var json = jsonSerializer.Serialize(body);
+            var content = string.Empty;
+            if (body is string)
+            {
+                if (contentType == ContentTypes.Form)
+                {
+                    content = body.ToString();
+                }
+                else
+                {
+                    var rawStr = body.ToString();
+                    try
+                    {
+                        JToken.Parse(rawStr);
+                        content = rawStr;
+                    }
+                    catch
+                    {
+                        var jsonSerializer = new NewtonsoftSerializer();
+                        content = jsonSerializer.Serialize(rawStr);
+                    }
+                    contentType = ContentTypes.Json;
+                }
+            }
+            else if (body is FormString)
+            {
+                content = body.ToString();
+                contentType = ContentTypes.Form;
+            }
+            else
+            {
+                var jsonSerializer = new NewtonsoftSerializer();
+                content = jsonSerializer.Serialize(body);
+                contentType = ContentTypes.Json;
+            }
 
-            return new StringContent(json, Encoding.UTF8, ContentTypes.Json);
+            return new StringContent(content, Encoding.UTF8, contentType);
         }
         #endregion
     }

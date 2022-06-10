@@ -7,7 +7,7 @@
     /// https://stackoverflow.com/questions/372865/path-combine-for-urls；
     /// https://github.com/SharePoint/PnP-Sites-Core/blob/master/Core/OfficeDevPnP.Core/Utilities/UrlUtility.cs
     /// </remarks>
-    public static class UrlUtility
+    public static class URLUtility
     {
         const char PATH_DELIMITER = '/';
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -20,9 +21,9 @@ namespace HttpClientEx.Management
         /// <summary>
         /// 默认请求超时时间
         /// </summary>
-        public readonly static TimeSpan DefaultTimeout;
-
-        public HttpClientHandler HttpHandler { private set; get; }
+        private readonly static TimeSpan _defaultTimeout;
+        private readonly string _defaultKey = "default";
+        private static ConcurrentDictionary<string, HttpMessageHandler> _handlerDict = new ConcurrentDictionary<string, HttpMessageHandler>();
 
         static HttpClientManager()
         {
@@ -35,79 +36,75 @@ namespace HttpClientEx.Management
             //for post and put request to ensure remote end point is up and running.
             ServicePointManager.Expect100Continue = false;
 
-            //Nagle’s algorithm is a means of improving the efficiency of TCP/IP networks
+            //Nagle's algorithm is a means of improving the efficiency of TCP/IP networks
             //by reducing the number of packets that need to be sent over the network.
             //This can decrease the overall transmission overhead but can cause delay in data packet arrival.
             ServicePointManager.UseNagleAlgorithm = false;
 
-            DefaultTimeout = TimeSpan.FromSeconds(5);
+            _defaultTimeout = TimeSpan.FromSeconds(30);
         }
 
         public HttpClientManager()
-        { }
-
-        public HttpClientManager(HttpClientHandler handler)
         {
-            if (handler == null)
-                throw new ArgumentNullException(nameof(handler));
-
-            HttpHandler = handler;
-            TimeoutHandler.SetShardHandler(HttpHandler);
+            AddDefaultHttpClient();
         }
-
-        public void InitHandler(HttpClientHandler handler)
+        
+        public HttpClientManager AddHttpHandler(string name, HttpMessageHandler httpMessageHandler)
         {
-            if (HttpHandler != null)
-                throw new InvalidOperationException("already bind a HttpClientHandler");
+            if (name == _defaultKey)
+                throw new ArgumentException($"`{_defaultKey}` reserve for the default HttpClientHandler key");
 
-            if (handler == null)
-                throw new ArgumentNullException(nameof(handler));
+            _handlerDict.TryAdd(name, httpMessageHandler);
 
-            HttpHandler = handler;
-            TimeoutHandler.SetShardHandler(HttpHandler);
+            return this;
         }
 
         /// <summary>
         /// 创建一个HttpClient对象
         /// </summary>
-        public HttpClient CreateClient(int retry = 3)
+        public HttpClient CreateClient(int retry = 0)
         {
-            if (HttpHandler == null)
-                throw new InvalidOperationException("please init HttpClientHandler first");
-
-            return CreateClient(DefaultTimeout, retry);
+            return CreateClient(_defaultKey, _defaultTimeout, retry);
         }
 
         /// <summary>
         /// 创建一个HttpClient对象
         /// </summary>
-        public HttpClient CreateClient(TimeSpan timeout, int retry = 3)
+        public HttpClient CreateClient(string name, int retry = 0)
         {
-            if (HttpHandler == null)
-                throw new InvalidOperationException("please init HttpClientHandler first");
+            return CreateClient(name, _defaultTimeout, retry);
+        }
 
-            return new HttpClient(new TimeoutHandler(timeout, retry), disposeHandler: false);
+        /// <summary>
+        /// 创建一个HttpClient对象
+        /// </summary>
+        public HttpClient CreateClient(string name, TimeSpan timeout, int retry = 0)
+        {
+            if (_handlerDict.TryGetValue(name, out HttpMessageHandler handler))
+                return new HttpClient(new TimeoutHandler(handler, timeout, retry), disposeHandler: false) { Timeout = Timeout.InfiniteTimeSpan };
+
+            throw new Exception($"can not find corresponding HttpMessageHandler(name={name})");
+        }
+
+        private void AddDefaultHttpClient()
+        {
+            _handlerDict.TryAdd(_defaultKey, null);
         }
 
         private class TimeoutHandler : DelegatingHandler
         {
-            private static HttpClientHandler SharedHandler;
+            private static readonly Lazy<HttpMessageHandler> SharedHandler = new Lazy<HttpMessageHandler>(() => new HttpClientHandler());
             private static readonly HashSet<string> Endpoints = new HashSet<string>();
             private static readonly TimeSpan ConnectionCloseTimeoutPeriod = TimeSpan.FromMinutes(2);
 
             private readonly int _retry;
             private readonly TimeSpan _timeout;
 
-            public TimeoutHandler(TimeSpan timeout, int retry)
-                : base(SharedHandler)
+            public TimeoutHandler(HttpMessageHandler sharedHandler, TimeSpan timeout, int retry)
+                : base(sharedHandler ?? SharedHandler.Value)
             {
                 _timeout = timeout;
                 _retry = retry;
-            }
-
-            public static void SetShardHandler(HttpClientHandler handler)
-            {
-                SharedHandler = handler;
             }
 
             protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -117,12 +114,11 @@ namespace HttpClientEx.Management
 
                 return Execute.WithRetryAsync(async () =>
                 {
-                    using (var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
+                    using (var cts = GetCancellationTokenSource(request, cancellationToken))
                     {
                         try
                         {
-                            cts.CancelAfter(_timeout);
-                            return await base.SendAsync(request, cts.Token);
+                            return await base.SendAsync(request, cts?.Token ?? cancellationToken);
                         }
                         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested == false)
                         {
@@ -144,6 +140,22 @@ namespace HttpClientEx.Management
                     var sp = ServicePointManager.FindServicePoint(endpoint);
                     sp.ConnectionLeaseTimeout = (int)ConnectionCloseTimeoutPeriod.TotalMilliseconds;
                     Endpoints.Add(hash);
+                }
+            }
+
+            private CancellationTokenSource GetCancellationTokenSource(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                var timeout = request.GetTimeout() ?? _timeout;
+                if (timeout == Timeout.InfiniteTimeSpan)
+                {
+                    // No need to create a CTS if there's no timeout
+                    return null;
+                }
+                else
+                {
+                    var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    cts.CancelAfter(timeout);
+                    return cts;
                 }
             }
         }
