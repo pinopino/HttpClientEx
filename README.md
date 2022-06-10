@@ -56,4 +56,5 @@ var httpClientManager = new HttpClientManager().AddHttpHandler("bing", handler);
 
 ### 参考链接
 https://docs.microsoft.com/en-us/aspnet/core/fundamentals/http-requests?view=aspnetcore-5.0
-https://docs.microsoft.com/en-us/dotnet/api/system.net.http.httpclient
+https://thomaslevesque.com/2018/02/25/better-timeout-handling-with-httpclient/
+
