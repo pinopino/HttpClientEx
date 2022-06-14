@@ -206,13 +206,12 @@ namespace HttpClientEx
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
-            if (body == null)
-                throw new ArgumentNullException(nameof(body));
 
             var request = httpClient.CreateRequest(HttpMethod.Post, url, queryString, headers);
             if (timeout != TimeSpan.Zero)
                 request.SetTimeout(timeout);
-            request.Content = CreateContent(body, contentType);
+            if (body != null)
+                request.Content = CreateContent(body, contentType);
 
             using (var response = httpClient.SendAsync(request).Result)
             {
@@ -235,13 +234,12 @@ namespace HttpClientEx
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
-            if (body == null)
-                throw new ArgumentNullException(nameof(body));
 
             var request = httpClient.CreateRequest(HttpMethod.Post, url, queryString, headers);
             if (timeout != TimeSpan.Zero)
                 request.SetTimeout(timeout);
-            request.Content = CreateContent(body, contentType);
+            if (body != null)
+                request.Content = CreateContent(body, contentType);
 
             using (var response = await httpClient.SendAsync(request))
             {
@@ -264,13 +262,12 @@ namespace HttpClientEx
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
-            if (body == null)
-                throw new ArgumentNullException(nameof(body));
 
             var request = httpClient.CreateRequest(HttpMethod.Post, url, queryString, headers);
             if (timeout != TimeSpan.Zero)
                 request.SetTimeout(timeout);
-            request.Content = CreateContent(body, contentType);
+            if (body != null)
+                request.Content = CreateContent(body, contentType);
 
             using (var response = httpClient.SendAsync(request).Result)
             {
@@ -293,13 +290,12 @@ namespace HttpClientEx
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
-            if (body == null)
-                throw new ArgumentNullException(nameof(body));
 
             var request = httpClient.CreateRequest(HttpMethod.Post, url, queryString, headers);
             if (timeout != TimeSpan.Zero)
                 request.SetTimeout(timeout);
-            request.Content = CreateContent(body, contentType);
+            if (body != null)
+                request.Content = CreateContent(body, contentType);
 
             using (var response = await httpClient.SendAsync(request))
             {
@@ -322,13 +318,12 @@ namespace HttpClientEx
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
-            if (body == null)
-                throw new ArgumentNullException(nameof(body));
 
             var request = httpClient.CreateRequest(HttpMethod.Post, url, queryString, headers);
             if (timeout != TimeSpan.Zero)
                 request.SetTimeout(timeout);
-            request.Content = CreateContent(body, contentType);
+            if (body != null)
+                request.Content = CreateContent(body, contentType);
 
             return httpClient.SendAsync(request);
         }
@@ -349,13 +344,12 @@ namespace HttpClientEx
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
-            if (body == null)
-                throw new ArgumentNullException(nameof(body));
 
             var request = httpClient.CreateRequest(new HttpMethod("PATCH"), url, queryString, headers);
             if (timeout != TimeSpan.Zero)
                 request.SetTimeout(timeout);
-            request.Content = CreateContent(body, contentType);
+            if (body != null)
+                request.Content = CreateContent(body, contentType);
 
             return httpClient.SendAsync(request);
         }
@@ -376,13 +370,12 @@ namespace HttpClientEx
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentNullException(nameof(url));
-            if (body == null)
-                throw new ArgumentNullException(nameof(body));
 
             var request = httpClient.CreateRequest(HttpMethod.Put, url, queryString, headers);
             if (timeout != TimeSpan.Zero)
                 request.SetTimeout(timeout);
-            request.Content = CreateContent(body, contentType);
+            if (body != null)
+                request.Content = CreateContent(body, contentType);
 
             return httpClient.SendAsync(request);
         }
